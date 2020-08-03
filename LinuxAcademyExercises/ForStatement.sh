@@ -1,5 +1,5 @@
 #!/bin/bash
-# simple script showing a for statement
+# script demonstration how to perform a "for" statement
 
 # script start
 
