@@ -1,4 +1,4 @@
-## test AWS credentials can authenticate to an account
+## test AWS credentials can authenticate
 function aws-TestAccount() {
 	if [ -z "$1" ]
 	then
@@ -14,7 +14,7 @@ function aws-TestAccount() {
 	fi
 }
 
-## function to describe ec2 instances
+## function to describe ec2 instances using aws vault, prompt the user for a profile if none is specified
 function aws-ListInstances() {
 	if [ -z "$1" ]
 	then
@@ -57,7 +57,8 @@ function aws-Connect() {
 		aws-vault exec $profile -- aws ssm start-session --target $target
 	else
 		aws-vault exec $1 -- aws ssm start-session --target $target
-	
+	fi
+}
 
 ## function to connect to an ec2 instance via SSM (RDP Connection via port forwarding)
 function aws-ConnectRDP() {
@@ -102,4 +103,21 @@ function aws-ConnectRDP() {
     done
 
     aws-vault exec $profile -- aws ssm start-session --target "$target" --document-name AWS-StartPortForwardingSession --parameters "localPortNumber=$localPortNumber,portNumber=3389"
+}
+
+# custom aws-vault script to login to brave browser in a private window
+function awslogin() {
+  if [ -z "$1" ]
+  then
+    profile=$(aws-vault list | awk '{print $1}' | fzf)
+    if [ -z "$profile" ]
+    then
+      echo "No profile selected."
+      return 1
+    fi
+  else
+    profile=$1
+  fi
+
+  aws-vault --debug login $profile --stdout | xargs -t nohup /Applications/Brave\ Browser.app/Contents/MacOS/Brave\ Browser --no-first-run --new-window --incognito --disk-cache-dir=$(mktemp -d /tmp/brave.XXXXXX)
 }
